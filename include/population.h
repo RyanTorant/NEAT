@@ -57,8 +57,10 @@ namespace NEAT {
 
 		// ******* Fitness Statistics *******
 		double mean_fitness;
-		double variance;
-		double standard_deviation;
+		double mean_real_fitness;
+		double max_real_fitness;
+		//double variance;
+		//double standard_deviation;
 
 		int winnergen; //An integer that when above zero tells when the first winner appeared
 

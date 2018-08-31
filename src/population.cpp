@@ -508,11 +508,17 @@ bool Population::epoch(int generation) {
 
 	//Go through the organisms and add up their fitnesses to compute the
 	//overall average
+	mean_real_fitness = 0;
+	max_real_fitness = 0;
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		total+=(*curorg)->fitness;
+		mean_real_fitness += (*curorg)->orig_fitness;
+		if ((*curorg)->orig_fitness > max_real_fitness)
+			max_real_fitness = (*curorg)->orig_fitness;
 	}
-	overall_average=total/total_organisms;
-	std::cout<<"Generation "<<generation<<": "<<"overall_average = "<<overall_average<<std::endl;
+	mean_fitness = overall_average=total/total_organisms;
+	mean_real_fitness /= total_organisms;
+	std::cout<<"Generation "<<generation<<": "<<"overall_average = "<<overall_average<< " | " << mean_real_fitness << std::endl;
 
 	//Now compute expected number of offspring for each individual organism
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
@@ -552,7 +558,7 @@ bool Population::epoch(int generation) {
 		//If the average fitness is allowed to hit 0, then we no longer have 
 		//an average we can use to assign offspring.
 		if (final_expected<total_organisms) {
-			//      cout<<"Population died!"<<endl;
+			      std::cout<<"Population died!"<<std::endl;
 			//cin>>pause;
 			for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
 				(*curspecies)->expected_offspring=0;
@@ -592,7 +598,7 @@ bool Population::epoch(int generation) {
 	//Check for stagnation- if there is stagnation, perform delta-coding
 	if (highest_last_changed>=NEAT::dropoff_age+5) {
 
-		//    cout<<"PERFORMING DELTA CODING"<<endl;
+		   std::cout<<"PERFORMING DELTA CODING"<<std::endl;
 
 		highest_last_changed=0;
 
@@ -801,7 +807,6 @@ bool Population::epoch(int generation) {
 		}
 
 	}
-
 	//cout<<"Reproducing"<<endl;
 
 	//Perform reproduction.  Reproduction is done on a per-Species

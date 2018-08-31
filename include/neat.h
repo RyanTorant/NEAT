@@ -18,6 +18,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <random>
+#include <chrono>
 
 namespace NEAT {
 
@@ -77,19 +79,26 @@ namespace NEAT {
 	int getUnitCount(const char *string, const char *set);
 
 	// Inline Random Functions 
+	// @RyanTorant : YOU DON'T USE RAND() IN C++1x! EVER! IT SUCKS!
 	extern inline int randposneg() {
-        if (rand()%2) 
+		thread_local std::minstd_rand rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+		return std::uniform_int_distribution<int>(0, 1)(rng) ? 1 : -1;
+        /*if (rand()%2) 
             return 1; 
         else 
-            return -1;
+            return -1;*/
     }
     
 	extern inline int randint(int x,int y) {
-        return rand()%(y-x+1)+x;
+		thread_local std::minstd_rand rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+		return std::uniform_int_distribution<int>(x, y)(rng);
+		//return rand()%(y-x+1)+x;
     }
 
     extern inline double randfloat() {
-        return rand() / (double) RAND_MAX;        
+		thread_local std::minstd_rand rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+		return std::uniform_real_distribution<float>(0,1)(rng);
+        //return rand() / (double) RAND_MAX;        
     }
 
 
