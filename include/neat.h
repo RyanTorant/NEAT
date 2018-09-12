@@ -56,6 +56,12 @@ namespace NEAT {
 	extern double mutate_link_weights_prob;
 	extern double mutate_toggle_enable_prob;
 	extern double mutate_gene_reenable_prob;
+
+	// AGIO
+	extern float mutate_morph_param_spread;
+	extern float mutate_morph_param_prob;
+	extern float destructive_mutate_morph_param_prob;
+
 	extern double mutate_add_node_prob;
 	extern double mutate_add_link_prob;
 	extern double interspecies_mate_rate;    // Prob. of a mate being outside species 
@@ -64,7 +70,7 @@ namespace NEAT {
 	extern double mate_singlepoint_prob;
 	extern double mate_only_prob;            // Prob. of mating without mutation 
 	extern double recur_only_prob;  // Probability of forcing selection of ONLY links that are naturally recurrent 
-	extern int pop_size;  // Size of population 
+	//extern int pop_size;  // Size of population 
 	extern int dropoff_age;  // Age where Species starts to be penalized 
 	extern int newlink_tries;  // Number of tries mutate_add_link will attempt to find an open link 
 	extern int print_every; // Tells to print population to file every n generations 

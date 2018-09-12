@@ -20,15 +20,16 @@
 #include <sstream>
 using namespace NEAT;
 
-Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Gene*> g) {
+Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Gene*> g, std::unordered_map<int, agio::Parameter> p) {
 	genome_id=id;
 	traits=t;
 	nodes=n; 
 	genes=g;
+	MorphParams = p;
 }
 
 
-Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Link*> links) {
+Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Link*> links, std::unordered_map<int, agio::Parameter> p) {
 	std::vector<Link*>::iterator curlink;
 	Gene *tempgene;
 	traits=t;
@@ -42,7 +43,7 @@ Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector
 		tempgene=new Gene((*curlink)->linktrait, (*curlink)->weight,(*curlink)->in_node,(*curlink)->out_node,(*curlink)->is_recurrent,1.0,0.0);
 		genes.push_back(tempgene);
 	}
-
+	MorphParams = p;
 }
 
 Genome::Genome(const Genome& genome)
@@ -104,6 +105,7 @@ Genome::Genome(const Genome& genome)
 }
 
 Genome::Genome(int id, std::ifstream &iFile) {
+	// TODO : More a note than a todo. This won't load the parameters
 
 	char curword[128];  //max word size of 128 characters
 	char curline[1024]; //max line size of 1024 characters
@@ -220,7 +222,7 @@ Genome::Genome(int id, std::ifstream &iFile) {
 
 }
 
-
+#if 0
 Genome::Genome(int new_id,int i, int o, int n,int nmax, bool r, double linkprob) {
 	int totalnodes;
 	bool *cm; //The connection matrix which will be randomized
@@ -378,7 +380,7 @@ Genome::Genome(int new_id,int i, int o, int n,int nmax, bool r, double linkprob)
 		delete [] cm;
 
 }
-
+#endif
 
 Genome::Genome(int num_in,int num_out,int num_hidden,int type) {
 
@@ -923,6 +925,7 @@ double Genome::get_last_gene_innovnum() {
 }
 
 Genome *Genome::duplicate(int new_id) {
+
 	//Collections for the new Genome
 	std::vector<Trait*> traits_dup;
 	std::vector<NNode*> nodes_dup;
@@ -994,10 +997,41 @@ Genome *Genome::duplicate(int new_id) {
 	}
 
 	//Finally, return the genome
-	newgenome=new Genome(new_id,traits_dup,nodes_dup,genes_dup);
+	newgenome=new Genome(new_id,traits_dup,nodes_dup,genes_dup, MorphParams);
 
 	return newgenome;
 
+}
+
+using namespace std;
+
+void Genome::mutate_random_morph_param()
+{
+	// Nothing to do if there are no parameters
+	if (MorphParams.size() == 0) return;
+
+	// O(n) sadly
+	auto random_it = std::next(std::begin(MorphParams), uniform_int_distribution<int>(0, MorphParams.size()-1)(RNG));
+	auto& param = random_it->second;
+
+	uniform_real_distribution<float> distribution(param.Min, param.Max);
+	param.Value = distribution(RNG);
+	param.HistoricalMarker = agio::Parameter::CurrentMarkerID.fetch_add(1);// Create a new historical marker
+}
+void Genome::destructive_mutate_random_param()
+{
+	// Nothing to do if there are no parameters
+	if (MorphParams.size() == 0) return;
+
+	// O(n) sadly
+	auto random_it = std::next(std::begin(MorphParams), uniform_int_distribution<int>(0, MorphParams.size() - 1)(RNG));
+	auto& param = random_it->second;
+
+	float shift = normal_distribution<float>(0, mutate_morph_param_spread)(RNG);
+	param.Value += shift * abs(param.Max - param.Min);
+
+	// Clamp values
+	param.Value = clamp(param.Value, param.Min, param.Max);
 }
 
 void Genome::mutate_random_trait() {
@@ -2278,11 +2312,29 @@ Genome *Genome::mate_multipoint(Genome *g,int genomeid,double fitness1,double fi
 
 		}
 
-		new_genome=new Genome(genomeid,newtraits,newnodes,newgenes);
+	// Cross parameters
+	auto params = g->MorphParams;
+	for (auto &[idx, cparam] : params)
+	{
+		// Search for this parameter in the other individual
+		auto param_iter = g->MorphParams.find(idx);
+		if (param_iter != g->MorphParams.end())
+		{
+			// Also check that the parameters have the same historical marker
+			// This way you don't cross parameters that are far apart
+			if (param_iter->second.HistoricalMarker == cparam.HistoricalMarker)
+			{
+				// Average the value of this parent with the other parent
+				cparam.Value = 0.5f * (cparam.Value + param_iter->second.Value);
+			}
+		}
+	}
 
-		//Return the baby Genome
-		return (new_genome);
+	new_genome=new Genome(genomeid,newtraits,newnodes,newgenes,move(params));
 
+
+	//Return the baby Genome
+	return (new_genome);
 }
 
 Genome *Genome::mate_multipoint_avg(Genome *g,int genomeid,double fitness1,double fitness2,bool interspec_flag) {
@@ -2619,8 +2671,26 @@ Genome *Genome::mate_multipoint_avg(Genome *g,int genomeid,double fitness1,doubl
 
 		delete avgene;  //Clean up used object
 
+		// Cross parameters
+		auto params = g->MorphParams;
+		for (auto &[idx, cparam] : params)
+		{
+			// Search for this parameter in the other individual
+			auto param_iter = g->MorphParams.find(idx);
+			if (param_iter != g->MorphParams.end())
+			{
+				// Also check that the parameters have the same historical marker
+				// This way you don't cross parameters that are far apart
+				if (param_iter->second.HistoricalMarker == cparam.HistoricalMarker)
+				{
+					// Average the value of this parent with the other parent
+					cparam.Value = 0.5f * (cparam.Value + param_iter->second.Value);
+				}
+			}
+		}
+
 		//Return the baby Genome
-		return (new Genome(genomeid,newtraits,newnodes,newgenes));
+		return (new Genome(genomeid,newtraits,newnodes,newgenes,move(params)));
 
 }
 
@@ -2913,8 +2983,26 @@ Genome *Genome::mate_singlepoint(Genome *g,int genomeid) {
 
 	delete avgene;  //Clean up used object
 
+	// Cross parameters
+	auto params = g->MorphParams;
+	for (auto &[idx, cparam] : params)
+	{
+		// Search for this parameter in the other individual
+		auto param_iter = g->MorphParams.find(idx);
+		if (param_iter != g->MorphParams.end())
+		{
+			// Also check that the parameters have the same historical marker
+			// This way you don't cross parameters that are far apart
+			if (param_iter->second.HistoricalMarker == cparam.HistoricalMarker)
+			{
+				// Average the value of this parent with the other parent
+				cparam.Value = 0.5f * (cparam.Value + param_iter->second.Value);
+			}
+		}
+	}
+
 	//Return the baby Genome
-	return (new Genome(genomeid,newtraits,newnodes,newgenes));
+	return (new Genome(genomeid,newtraits,newnodes,newgenes,move(params)));
 
 }
 

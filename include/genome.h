@@ -19,6 +19,27 @@
 #include <vector>
 #include "gene.h"
 #include "innovation.h"
+#include <unordered_map>
+#include <atomic>
+#include <random>
+
+// AGIO
+// Represents a parameter of the individual
+namespace agio
+{
+	struct Parameter
+	{
+		int ID;
+		float Value;
+		int HistoricalMarker; // Used to keep track of changes, same as NEAT
+
+		// Stores the parameter range
+		float Min;
+		float Max;
+							  // Used to create the historical markers IDs
+		inline static std::atomic<int> CurrentMarkerID = 0;
+	};
+}
 
 namespace NEAT {
 
@@ -26,6 +47,7 @@ namespace NEAT {
 		GAUSSIAN = 0,
 		COLDGAUSSIAN = 1
 	};
+
 
 	//----------------------------------------------------------------------- 
 	//A Genome is the primary source of genotype information used to create   
@@ -42,9 +64,13 @@ namespace NEAT {
 	//    link-building.
 
 	class Genome {
-
+		// AGIO
+		std::minstd_rand RNG;
 	public:
 		int genome_id;
+
+		// AGIO
+		std::unordered_map<int, agio::Parameter> MorphParams;
 
 		std::vector<Trait*> traits; //parameter conglomerations
 		std::vector<NNode*> nodes; //List of NNodes for the Network
@@ -58,10 +84,10 @@ namespace NEAT {
 		void print_genome(); //Displays Genome on screen
 
 		//Constructor which takes full genome specs and puts them into the new one
-		Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Gene*> g);
+		Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Gene*> g, std::unordered_map<int, agio::Parameter> p);
 
 		//Constructor which takes in links (not genes) and creates a Genome
-		Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Link*> links);
+		Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Link*> links, std::unordered_map<int, agio::Parameter> p);
 
 		// Copy constructor
 		Genome(const Genome& genome);
@@ -76,7 +102,7 @@ namespace NEAT {
 		// be included. 
 		// The last input is a bias
 		// Linkprob is the probability of a link  
-		Genome(int new_id,int i, int o, int n,int nmax, bool r, double linkprob);
+		//Genome(int new_id,int i, int o, int n,int nmax, bool r, double linkprob);
 
 		//Special constructor that creates a Genome of 3 possible types:
 		//0 - Fully linked, no hidden nodes
@@ -111,6 +137,10 @@ namespace NEAT {
 		bool verify();
 
 		// ******* MUTATORS *******
+
+		// AGIO
+		void mutate_random_morph_param();
+		void destructive_mutate_random_param();
 
 		// Perturb params in one trait
 		void mutate_random_trait();

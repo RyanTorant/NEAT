@@ -482,10 +482,10 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 			outside=false;
 
 			//Debug Trap
-			if (expected_offspring>NEAT::pop_size) {
+			/*if (expected_offspring>NEAT::pop_size) {
 				//      std::cout<<"ALERT: EXPECTED OFFSPRING = "<<expected_offspring<<std::endl;
 				//      cin>>pause;
-			}
+			}*/
 
 			//If we have a super_champ (Population champion), finish off some special clones
 			if ((thechamp->super_champ_offspring) > 0) {
@@ -617,6 +617,15 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 							//std::cout<<"mutate gene reenable"<<std::endl;
 							new_genome->mutate_gene_reenable();
 						}
+						// AGIO
+						if (randfloat()<NEAT::mutate_morph_param_prob) 
+						{
+							if (randfloat()<NEAT::destructive_mutate_morph_param_prob)
+								new_genome->destructive_mutate_random_param();
+							else
+								new_genome->mutate_random_morph_param();
+						}
+						
 					}
 
 					baby=new Organism(0.0,new_genome,generation);
@@ -777,6 +786,14 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						if (randfloat()<NEAT::mutate_gene_reenable_prob) {
 							new_genome->mutate_gene_reenable(); 
 							//std::cout<<"mutate_gene_reenable: "<<new_genome<<std::endl;
+						}
+						// AGIO
+						if (randfloat()<NEAT::mutate_morph_param_prob)
+						{
+							if (randfloat()<NEAT::destructive_mutate_morph_param_prob)
+								new_genome->destructive_mutate_random_param();
+							else
+								new_genome->mutate_random_morph_param();
 						}
 					}
 

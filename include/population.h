@@ -41,7 +41,7 @@ namespace NEAT {
 		// There will be size Genomes added to the Population 
 		// The Population does not have to be empty to add Genomes 
 		bool spawn(Genome *g,int size);
-
+		int PopSize;
 	public:
 
         std::vector<Organism*> organisms; //The organisms in the Population
@@ -88,7 +88,8 @@ namespace NEAT {
 
 		// Turnover the population to a new generation using fitness 
 		// The generation argument is the next generation
-		bool epoch(int generation);
+		// AGIO :  The second parameter changes the pop size while evolving. It works by tweaking the children count
+		bool epoch(int generation, int PopulationSizeChange = 0 /* AGIO */);
 
 		// *** Real-time methods *** 
 
@@ -113,7 +114,7 @@ namespace NEAT {
 		//Population(int size,int i,int o, int nmax, bool r, double linkprob);
 
 		// Construct off of a file of Genomes 
-		Population(const char *filename);
+		//Population(const char *filename);
 
 		// It can delete a Population in two ways:
 		//    -delete by killing off the species

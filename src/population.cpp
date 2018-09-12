@@ -92,7 +92,7 @@ Population::Population(std::vector<Genome*> genomeList, float power) {
 	//Separate the new Population into species
 	speciate();
 }
-
+#if 0
 Population::Population(const char *filename) {
 
 	char curword[128];  //max word size of 128 characters
@@ -194,7 +194,7 @@ Population::Population(const char *filename) {
 
 	}
 }
-
+#endif
 
 Population::~Population() {
 
@@ -291,6 +291,7 @@ bool Population::spawn(Genome *g,int size) {
 	//Separate the new Population into species
 	speciate();
 
+	PopSize = size;
 	return true;
 }
 
@@ -401,8 +402,8 @@ bool Population::print_to_file_by_species(std::ostream& outFile) {
 
 }
 
-bool Population::epoch(int generation) {
-
+bool Population::epoch(int generation, int PopSizeChange) {
+	
 	std::vector<Species*>::iterator curspecies;
 	std::vector<Species*>::iterator deadspecies;  //For removing empty Species
 
@@ -423,7 +424,9 @@ bool Population::epoch(int generation) {
 	//Offspring
 	double skim; 
 	int total_expected;  //precision checking
-	int total_organisms=organisms.size();
+	int total_organisms=organisms.size() + PopSizeChange;
+	//PopSize = total_organisms;
+
 	int max_expected;
 	Species *best_species;
 	int final_expected;
@@ -534,6 +537,7 @@ bool Population::epoch(int generation) {
 		total_expected+=(*curspecies)->expected_offspring;
 	}    
 
+
 	//Need to make up for lost foating point precision in offspring assignment
 	//If we lost precision, give an extra baby to the best Species
 	if (total_expected<total_organisms) {
@@ -601,8 +605,8 @@ bool Population::epoch(int generation) {
 		   std::cout<<"PERFORMING DELTA CODING"<<std::endl;
 
 		highest_last_changed=0;
-
-		half_pop=NEAT::pop_size/2;
+		
+		half_pop=PopSize/2;
 
 		//    cout<<"half_pop"<<half_pop<<" pop_size-halfpop: "<<pop_size-half_pop<<endl;
 
@@ -616,8 +620,8 @@ bool Population::epoch(int generation) {
 
 		if (curspecies!=sorted_species.end()) {
 
-			(*(((*curspecies)->organisms).begin()))->super_champ_offspring=NEAT::pop_size-half_pop;
-			(*curspecies)->expected_offspring=NEAT::pop_size-half_pop;
+			(*(((*curspecies)->organisms).begin()))->super_champ_offspring=PopSize-half_pop;
+			(*curspecies)->expected_offspring=PopSize-half_pop;
 			(*curspecies)->age_of_last_improvement=(*curspecies)->age;
 
 			++curspecies;
@@ -630,8 +634,8 @@ bool Population::epoch(int generation) {
 		}
 		else {
 			curspecies=sorted_species.begin();
-			(*(((*curspecies)->organisms).begin()))->super_champ_offspring+=NEAT::pop_size-half_pop;
-			(*curspecies)->expected_offspring=NEAT::pop_size-half_pop;
+			(*(((*curspecies)->organisms).begin()))->super_champ_offspring+=PopSize-half_pop;
+			(*curspecies)->expected_offspring=PopSize-half_pop;
 		}
 
 	}

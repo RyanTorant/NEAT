@@ -38,6 +38,12 @@ double NEAT::mutate_node_trait_prob = 0;
 double NEAT::mutate_link_weights_prob = 0;
 double NEAT::mutate_toggle_enable_prob = 0;
 double NEAT::mutate_gene_reenable_prob = 0;
+
+// AGIO
+float NEAT::mutate_morph_param_spread = 0;
+float NEAT::mutate_morph_param_prob = 0;
+float NEAT::destructive_mutate_morph_param_prob = 0;
+
 double NEAT::mutate_add_node_prob = 0;
 double NEAT::mutate_add_link_prob = 0;
 double NEAT::interspecies_mate_rate = 0; // Prob. of a mate being outside species 
@@ -46,7 +52,7 @@ double NEAT::mate_multipoint_avg_prob = 0;
 double NEAT::mate_singlepoint_prob = 0;
 double NEAT::mate_only_prob = 0; // Prob. of mating without mutation 
 double NEAT::recur_only_prob = 0;  // Probability of forcing selection of ONLY links that are naturally recurrent 
-int NEAT::pop_size = 0;  // Size of population 
+//int NEAT::pop_size = 0;  // Size of population 
 int NEAT::dropoff_age = 0;  // Age where Species starts to be penalized 
 int NEAT::newlink_tries = 0;  // Number of tries mutate_add_link will attempt to find an open link 
 int NEAT::print_every = 0; // Tells to print population to file every n generations 
@@ -341,7 +347,7 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
     //curwordnum += 2;
     
     paramFile>>curword;
-    paramFile>>NEAT::pop_size;
+    //paramFile>>NEAT::pop_size;
     
     //strcpy(curword, getUnit(filestring, curwordnum, delimiters));
     //NEAT::pop_size = atoi(curword);
@@ -407,7 +413,7 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
 	    printf("mate_singlepoint_prob=%f\n",mate_singlepoint_prob);
 	    printf("mate_only_prob=%f\n",mate_only_prob);
 	    printf("recur_only_prob=%f\n",recur_only_prob);
-	    printf("pop_size=%d\n",pop_size);
+	    //printf("pop_size=%d\n",pop_size);
 	    printf("dropoff_age=%d\n",dropoff_age);
 	    printf("newlink_tries=%d\n",newlink_tries);
 	    printf("print_every=%d\n",print_every);
