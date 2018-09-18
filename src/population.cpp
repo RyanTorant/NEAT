@@ -62,7 +62,8 @@ Population::Population(Genome *g,int size, float power) {
 //Added the ability for a population to be spawned
 //off of a vector of Genomes.  Useful when converging.
 Population::Population(std::vector<Genome*> genomeList, float power) {
-	
+	PopSize = genomeList.size();
+
 	winnergen=0;
 	highest_fitness=0.0;
 	highest_last_changed=0;
@@ -216,6 +217,7 @@ Population::~Population() {
 	for (std::vector<Innovation*>::iterator iter = innovations.begin(); iter != innovations.end(); ++iter)
 		delete *iter;
 
+	if (BestGenome) delete BestGenome;
 	//Delete the snapshots
 	//		for(cursnap=generation_snapshots.begin();cursnap!=generation_snapshots.end();++cursnap) {
 	//			delete (*cursnap);
@@ -267,6 +269,8 @@ bool Population::clone(Genome *g,int size, float power) {
 }
 
 bool Population::spawn(Genome *g,int size) {
+	PopSize = size;
+
 	int count;
 	Genome *new_genome;
 	Organism *new_organism;
@@ -291,7 +295,7 @@ bool Population::spawn(Genome *g,int size) {
 	//Separate the new Population into species
 	speciate();
 
-	PopSize = size;
+
 	return true;
 }
 
@@ -592,6 +596,10 @@ bool Population::epoch(int generation, int PopSizeChange) {
 			highest_fitness=((*(((*curspecies)->organisms).begin()))->orig_fitness);
 			highest_last_changed=0;
 			std::cout<<"NEW POPULATION RECORD FITNESS: "<<highest_fitness<<std::endl;
+
+			// A new best was found, so store a copy of it's genome
+			if (BestGenome) delete BestGenome;
+			BestGenome = (*curspecies)->organisms.front()->gnome->duplicate(0);
 		}
 	else {
 		++highest_last_changed;

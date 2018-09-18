@@ -42,7 +42,11 @@ namespace NEAT {
 		// The Population does not have to be empty to add Genomes 
 		bool spawn(Genome *g,int size);
 		int PopSize;
+
+		// Genome of the best organism across all the epochs
+		Genome * BestGenome = nullptr;
 	public:
+		Genome * GetBestGenome() { return BestGenome; }
 
         std::vector<Organism*> organisms; //The organisms in the Population
 
