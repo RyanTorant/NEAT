@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <atomic>
 #include <random>
+#include <boost/serialization/access.hpp>
 
 // AGIO
 // Represents a parameter of the individual
@@ -38,6 +39,20 @@ namespace agio
 		float Max;
 							  // Used to create the historical markers IDs
 		inline static std::atomic<int> CurrentMarkerID = 0;
+
+		Parameter(){};
+		Parameter(int id, float value) {
+		    ID = id;
+		    Value = value;
+		}
+
+        friend class boost::serialization::access;
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & ID;
+            ar & Value;
+        }
 	};
 }
 
