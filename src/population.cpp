@@ -18,6 +18,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <random>
+#include <chrono>
 using namespace NEAT;
 
 Population::Population(Genome *g,int size) {
@@ -93,6 +95,35 @@ Population::Population(std::vector<Genome*> genomeList, float power) {
 	//Separate the new Population into species
 	speciate();
 }
+
+Population::Population(int Size, const std::vector<Genome*>& GenomeList)
+{
+	PopSize = Size;
+
+	winnergen = 0;
+	highest_fitness = 0.0;
+	highest_last_changed = 0;
+
+	std::minstd_rand0 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+	std::uniform_int_distribution<int> idx_dist(0, GenomeList.size() - 1);
+	for (int i = 0; i < PopSize; i++)
+	{
+		auto base_genome = GenomeList[idx_dist(rng)];
+		auto genome = base_genome->duplicate(i);
+		genome->mutate_link_weights(1.0, 1.0, GAUSSIAN);
+		genome->randomize_traits();
+		organisms.push_back(new Organism(0.0, genome, 1));
+	}
+
+	//Keep a record of the innovation and node number we are on
+	cur_node_id = organisms.back()->gnome->get_last_node_id();
+	cur_innov_num = organisms.back()->gnome->get_last_gene_innovnum();
+
+	//Separate the new Population into species
+	speciate();
+}
+
+
 #if 0
 Population::Population(const char *filename) {
 
@@ -230,7 +261,7 @@ bool Population::verify() {
 	bool verification;
 
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
-		verification=((*curorg)->gnome)->verify();
+		verification=((*curorg)->gnome)->VerifyGenome();
 	}
 
 	return verification;

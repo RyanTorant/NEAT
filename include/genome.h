@@ -38,7 +38,7 @@ namespace agio
 		float Min;
 		float Max;
 							  // Used to create the historical markers IDs
-		inline static std::atomic<int> CurrentMarkerID = 0;
+		static std::atomic<int> CurrentMarkerID;
 
 		Parameter(){};
 		Parameter(int id, float value) {
@@ -149,7 +149,7 @@ namespace NEAT {
 		// integrity
 		// Note: Some of these tests do not indicate a bug, but rather are meant
 		// to be used to detect specific system states
-		bool verify();
+		bool VerifyGenome();
 
 		// ******* MUTATORS *******
 

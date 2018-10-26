@@ -110,6 +110,10 @@ namespace NEAT {
 		// Construct off of a vector of genomes with a mutation rate of "power"
 		Population(std::vector<Genome*> genomeList, float power);
 
+		// AGIO Addition
+		// Construct a population by selecting genomes randomly from a list and mutating them
+		Population(int Size, const std::vector<Genome*>& GenomeList);
+
 		bool clone(Genome *g,int size, float power);
 
 		//// Special constructor to create a population of random topologies     

@@ -20,6 +20,8 @@
 #include <sstream>
 using namespace NEAT;
 
+std::atomic<int> agio::Parameter::CurrentMarkerID = 0;
+
 Genome::Genome(int id, std::vector<Trait*> t, std::vector<NNode*> n, std::vector<Gene*> g, std::unordered_map<int, agio::Parameter> p) {
 	genome_id=id;
 	traits=t;
@@ -726,7 +728,7 @@ Network *Genome::genesis(int id) {
 
 }
 
-bool Genome::verify() {
+bool Genome::VerifyGenome() {
 	std::vector<NNode*>::iterator curnode;
 	std::vector<Gene*>::iterator curgene;
 	std::vector<Gene*>::iterator curgene2;
