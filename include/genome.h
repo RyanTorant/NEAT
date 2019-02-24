@@ -52,6 +52,9 @@ namespace agio
         {
             ar & ID;
             ar & Value;
+			ar & HistoricalMarker;
+			ar & Min;
+			ar & Max;
         }
 	};
 }
