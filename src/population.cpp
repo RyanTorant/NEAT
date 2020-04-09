@@ -628,7 +628,7 @@ bool Population::epoch(int generation, int PopSizeChange) {
 			highest_last_changed=0;
 			std::cout<<"NEW POPULATION RECORD FITNESS: "<<highest_fitness<<std::endl;
 
-			// A new best was found, so store a copy of it's genome
+			// A new best was found, so store a copy of its genome
 			if (BestGenome) delete BestGenome;
 			BestGenome = (*curspecies)->organisms.front()->gnome->duplicate(0);
 		}

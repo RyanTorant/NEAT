@@ -1013,12 +1013,14 @@ void Genome::mutate_random_morph_param()
 	if (MorphParams.size() == 0) return;
 
 	// O(n) sadly
-	auto random_it = std::next(std::begin(MorphParams), uniform_int_distribution<int>(0, MorphParams.size()-1)(RNG));
+	auto random_it = std::next(std::begin(MorphParams), uniform_int_distribution<int>(0, MorphParams.size() - 1)(RNG));
 	auto& param = random_it->second;
 
-	uniform_real_distribution<float> distribution(param.Min, param.Max);
-	param.Value = distribution(RNG);
-	param.HistoricalMarker = agio::Parameter::CurrentMarkerID.fetch_add(1);// Create a new historical marker
+	float shift = normal_distribution<float>(0, mutate_morph_param_spread)(RNG);
+	param.Value += shift * abs(param.Max - param.Min);
+
+	// Clamp values
+	param.Value = clamp(param.Value, param.Min, param.Max);
 }
 void Genome::destructive_mutate_random_param()
 {
@@ -1029,11 +1031,9 @@ void Genome::destructive_mutate_random_param()
 	auto random_it = std::next(std::begin(MorphParams), uniform_int_distribution<int>(0, MorphParams.size() - 1)(RNG));
 	auto& param = random_it->second;
 
-	float shift = normal_distribution<float>(0, mutate_morph_param_spread)(RNG);
-	param.Value += shift * abs(param.Max - param.Min);
-
-	// Clamp values
-	param.Value = clamp(param.Value, param.Min, param.Max);
+	uniform_real_distribution<float> distribution(param.Min, param.Max);
+	param.Value = distribution(RNG);
+	param.HistoricalMarker = agio::Parameter::CurrentMarkerID.fetch_add(1);// Create a new historical marker
 }
 
 void Genome::mutate_random_trait() {
