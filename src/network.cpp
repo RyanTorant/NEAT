@@ -393,11 +393,18 @@ void Network::load_sensors(const std::vector<float> &sensvals) {
 	std::vector<NNode*>::iterator sensPtr;
 	std::vector<float>::const_iterator valPtr;
 
-	for(valPtr = sensvals.begin(), sensPtr = inputs.begin(); sensPtr != inputs.end() && valPtr != sensvals.end(); ++sensPtr, ++valPtr) {
+	for(valPtr = sensvals.begin(), sensPtr = inputs.begin(); sensPtr != inputs.end() || valPtr != sensvals.end(); ++sensPtr)
+	{
 		//only load values into SENSORS (not BIASes)
-		if (((*sensPtr)->type)==SENSOR) {
+		if ((*sensPtr)->gen_node_label == INPUT)
+		{
 			(*sensPtr)->sensor_load(*valPtr);
-			//sensvals++;
+			++valPtr;
+		}
+		else
+		{
+			// Load a constant 1.0 on the bias inputs
+			(*sensPtr)->sensor_load(1.0);
 		}
 	}
 }

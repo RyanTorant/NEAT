@@ -412,6 +412,9 @@ Genome::Genome(int num_in,int num_out,int num_hidden,int type) {
 	newtrait=new Trait(1,0,0,0,0,0,0,0,0,0);
 	traits.push_back(newtrait);
 
+	// Add the bias input
+	num_in += 1;
+
 	//Adjust hidden number
 	if (type==0) 
 		num_hidden=0;
@@ -665,7 +668,7 @@ Network *Genome::genesis(int id) {
 
 	//Create the nodes
 	for(curnode=nodes.begin();curnode!=nodes.end();++curnode) {
-		newnode=new NNode((*curnode)->type,(*curnode)->node_id);
+		newnode=new NNode((*curnode)->type,(*curnode)->node_id, (*curnode)->gen_node_label);
 
 		//Derive the node parameters from the trait pointed to
 		curtrait=(*curnode)->nodetrait;
@@ -1407,7 +1410,7 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 	//Split next link with a bias towards older links
 	//NOTE: 7/2/01 - for robots, went back to random split
 	//        because of large # of inputs
-	if (false) {
+	if (true) {
 		thegene=genes.begin();
 		while (((thegene!=genes.end())
 			&&(!((*thegene)->enable)))||
@@ -1452,9 +1455,7 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 			genenum=randint(0,genes.size()-1);
 
 			//find the gene
-			thegene=genes.begin();
-			for(int genecount=0;genecount<genenum;genecount++)
-				++thegene;
+			thegene = genes.begin() + genenum;
 
 			//If either the gene is disabled, or it has a bias input, try again
 			if (!(((*thegene)->enable==false)||
@@ -1612,6 +1613,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 		do_recur=true;
 	else do_recur=false;
 
+#if 0
 	//Find the first non-sensor so that the to-node won't look at sensors as
 	//possible destinations
 	first_nonsensor=0;
@@ -1760,6 +1762,23 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 		} //End of normal link finding loop
 	}
+#endif
+
+	// Node 1 can be anything, node 2 needs to not be an input (you can't change an input value)
+	// Check that the link doesn't already exist, two links between the same nodes are useless
+	auto lnk_cmp = [nodep1, nodep2](Gene* gene)
+	{
+		return gene->lnk->in_node == nodep1 && gene->lnk->out_node == nodep2;
+	};
+	
+	nodep1 = nodes[randint(0, nodes.size() - 1)];
+	do
+	{
+		nodep2 = nodes[randint(0, nodes.size() - 1)];
+	} 
+	while (	nodep2->type == NEAT::SENSOR && 
+			find_if(genes.begin(), genes.end(), lnk_cmp) == genes.end());
+	found = true;
 
 	//Continue only if an open link was found
 	if (found) {
@@ -1806,7 +1825,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 				//Choose the new weight
 				//newweight=(gaussrand())/1.5;  //Could use a gaussian
-				newweight=randposneg()*randfloat()*1.0; //used to be 10.0
+				newweight= randfloat(-1.0f,1.0f); //used to be 10.0
 
 				//Create the new gene
 				newgene=new Gene(((thetrait[traitnum])),newweight,nodep1,nodep2,recurflag,curinnov,newweight);

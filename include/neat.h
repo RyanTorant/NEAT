@@ -101,9 +101,9 @@ namespace NEAT {
 		//return rand()%(y-x+1)+x;
     }
 
-    extern inline double randfloat() {
+	extern inline double randfloat(float a = 0, float b = 1) {
 		thread_local std::minstd_rand rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-		return std::uniform_real_distribution<float>(0,1)(rng);
+		return std::uniform_real_distribution<float>(a,b)(rng);
         //return rand() / (double) RAND_MAX;        
     }
 

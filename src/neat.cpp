@@ -58,61 +58,7 @@ int NEAT::newlink_tries = 0;  // Number of tries mutate_add_link will attempt to
 int NEAT::print_every = 0; // Tells to print population to file every n generations 
 int NEAT::babies_stolen = 0; // The number of babies to siphen off to the champions 
 int NEAT::num_runs = 0;
-//MRandomR250 NEAT::NEATRandGen = MRandomR250(Platform::getRealMilliseconds()); // Random number generator; can pass seed value as argument here
-//MRandomR250 NEAT::NEATRandGen = MRandomR250();
 
-//const char* NEAT::getUnit(const char *string, int index, const char *set)
-//{
-//	int sz;
-//	while(index--)
-//	{
-//		if(!*string)
-//			return "";
-//		sz = strcspn(string, set);
-//		if (string[sz] == 0)
-//			return "";
-//		string += (sz + 1);    
-//	}
-//	sz = strcspn(string, set);
-//	if (sz == 0)
-//		return "";
-//	char *ret = getReturnBuffer(sz+1);
-//	strncpy(ret, string, sz);
-//	ret[sz] = '\0';
-//	return ret;
-//}
-//
-//const char* NEAT::getUnits(const char *string, int startIndex, int endIndex, const char *set)
-//{
-//	int sz;
-//	int index = startIndex;
-//	while(index--)
-//	{
-//		if(!*string)
-//			return "";
-//		sz = strcspn(string, set);
-//		if (string[sz] == 0)
-//			return "";
-//		string += (sz + 1);    
-//	}
-//	const char *startString = string;
-//	while(startIndex <= endIndex--)
-//	{
-//		sz = strcspn(string, set);
-//		string += sz;
-//		if (*string == 0)
-//			break;
-//		string++;
-//	}
-//	if(!*string)
-//		string++;
-//	int totalSize = (int(string - startString));
-//	char *ret = getReturnBuffer(totalSize);
-//	strncpy(ret, startString, totalSize - 1);
-//	ret[totalSize-1] = '\0';
-//	return ret;
-//}
-//
 int NEAT::getUnitCount(const char *string, const char *set)
 {
     int count = 0;
@@ -356,30 +302,14 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
     paramFile>>curword;
     paramFile>>NEAT::dropoff_age;
     
-    //strcpy(curword, getUnit(filestring, curwordnum, delimiters));
-    //NEAT::dropoff_age = atoi(curword);
-    //curwordnum += 2;
-    
     paramFile>>curword;
     paramFile>>NEAT::newlink_tries;
-    
-    //strcpy(curword, getUnit(filestring, curwordnum, delimiters));
-    //NEAT::newlink_tries = atoi(curword);
-    //curwordnum += 2;
     
     paramFile>>curword;
     paramFile>>NEAT::print_every;
     
-    //strcpy(curword, getUnit(filestring, curwordnum, delimiters));
-    //NEAT::print_every = atoi(curword);
-    //curwordnum += 2;
-    
     paramFile>>curword;
     paramFile>>NEAT::babies_stolen;
-    
-    //strcpy(curword, getUnit(filestring, curwordnum, delimiters));
-    //NEAT::babies_stolen = atoi(curword);
-    //curwordnum += 2;
 
     paramFile>>curword;
     paramFile>>NEAT::num_runs;
@@ -424,23 +354,6 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
 	paramFile.close();
 	return true;
 }
-
-/* Inline Functions in Header file
-int NEAT::randposneg() {
-	if (NEAT::NEATRandGen.randI()%2) 
-		return 1; 
-	else 
-		return -1;
-}
-
-int NEAT::randint(int x,int y) {
-	return NEAT::NEATRandGen.randI()%(y-x+1)+x;
-}
-
-double NEAT::randfloat() {
-	return NEAT::NEATRandGen.randF();
-}
-*/
 
 double NEAT::gaussrand() {
 	static int iset=0;

@@ -21,8 +21,8 @@
 using namespace NEAT;
 
 Trait::Trait () {
-	for (int count=0;count<NEAT::num_trait_params;count++)
-		params[count]=0;
+	for (auto& param : params)
+		param = 0;
 	trait_id=0;
 }
 
@@ -115,9 +115,12 @@ void Trait::print_to_file(std::ostream &outFile) {
     outFile << std::endl;
 }
 
-void Trait::mutate() {
-	for(int count=0;count<NEAT::num_trait_params;count++) {
-		if (randfloat()>NEAT::trait_param_mut_prob) {
+void Trait::mutate() 
+{
+	for(int count=0;count<NEAT::num_trait_params;count++) 
+	{
+		if (randfloat()>NEAT::trait_param_mut_prob) 
+		{
 			params[count]+=(randposneg()*randfloat())*NEAT::trait_mutation_power;
 			if (params[count]<0) params[count]=0;
 			if (params[count]>1.0) params[count]=1.0;
